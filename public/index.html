@@ -1555,12 +1555,12 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
           <input class="fi" type="text" id="f-tazkira" placeholder="نمبر تذکره" style="direction:ltr;" oninput="this.value=toEnglishDigits(this.value)">
         </div>
         <div class="fg">
-          <label class="fl">نام سرپرست</label>
-          <input class="fi" type="text" id="f-guardian" placeholder="نام سرپرست" lang="fa">
+          <label class="fl">نام ضمانت کننده</label>
+          <input class="fi" type="text" id="f-guardian" placeholder="نام ضمانت کننده" lang="fa">
         </div>
         <div class="fg">
-          <label class="fl">نام پدر سرپرست</label>
-          <input class="fi" type="text" id="f-guardian-father" placeholder="نام پدر سرپرست" lang="fa">
+          <label class="fl">اسم پدر ضمانت کننده</label>
+          <input class="fi" type="text" id="f-guardian-father" placeholder="اسم پدر ضمانت کننده" lang="fa">
         </div>
         <div class="fg">
           <label class="fl">موبایل سرپرست <span id="mobileHint" style="color:var(--text3);font-size:.65rem;">(۱۰ رقم)</span></label>
@@ -1619,15 +1619,15 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
             <option value="private">🏫 خصوصی</option>
           </select>
         </div>
-        <div class="fg" id="school-dropdown-wrap" style="display:none;">
-          <label class="fl">نام مکتب خصوصی <span style="color:var(--red)">*</span> (از لیست)</label>
+        <div class="fg" id="school-dropdown-wrap">
+          <label class="fl">نام مکتب (از لیست)</label>
           <select class="fi" id="f-school">
             <option value="">— انتخاب کنید —</option>
           </select>
         </div>
         <div class="fg" id="school-name-wrap" style="display:none;">
-          <label class="fl">نام مکتب دولتی <span style="color:var(--red)">*</span></label>
-          <input class="fi" type="text" id="f-school-name" placeholder="نام مکتب دولتی را وارد کنید" lang="fa">
+          <label class="fl">نام مکتب خصوصی <span style="color:var(--red)">*</span></label>
+          <input class="fi" type="text" id="f-school-name" placeholder="نام مکتب خصوصی را وارد کنید" lang="fa">
         </div>
 
         <div class="fg">
@@ -3226,8 +3226,8 @@ function saveOrphan() {
     tazkira: document.getElementById('f-tazkira')?.value.trim()||'',
     goesSchool,
     schoolType: goesSchool ? schoolType : '',
-    schoolName: (goesSchool && schoolType === 'public') ? document.getElementById('f-school-name').value.trim() : '',
-    school: (goesSchool && schoolType === 'private') ? document.getElementById('f-school').value : '',
+    schoolName: (goesSchool && schoolType === 'private') ? document.getElementById('f-school-name').value.trim() : '',
+    school: (goesSchool && schoolType !== 'private') ? document.getElementById('f-school').value : '',
     studenttype: document.getElementById('f-studenttype')?.value || 'orphan',
     priority: document.getElementById('f-priority')?.value || '',
     edutype: document.getElementById('f-edutype').value,
@@ -3372,7 +3372,7 @@ function viewOrphan(id) {
     {label:'⭐ سطح استحقاق', value: o.priority==='very_worthy'?'🔴 بسیار مستحق':o.priority==='worthy'?'🟡 مستحق':o.priority==='average'?'🟢 متوسط':'—'},
     {label:'صنف در مکتب', value:o.grade?(o.grade==='university'?'پوهنتون':o.grade==='course'?'کورس':o.grade==='none'?'—':`صنف ${o.grade}`):'—'},
     {label:'وقت درسی', value:o.studytime==='AM'?'قبل از ظهر':o.studytime==='PM'?'بعد از ظهر':o.studytime==='Both'?'صبح و عصر':'—'},
-    {label:'نام پدر سرپرست', value:o.guardianFather||'—'},
+    {label:'نام پدر ضمانت کننده', value:o.guardianFather||'—'},
     {label:t('ml.school'), value:getSchoolName(o.school)},
     {label:'نوع شمولیت', value:o.edutype==='School'?'مکتب':o.edutype==='Course'?'کورس':o.edutype==='Both'?'هر دو':o.edutype||'—'},
     {label:'صنف در کورس', value:o.coursegrade||'—'},
@@ -4726,21 +4726,16 @@ function onSchoolTypeChange() {
     if (customWrap) customWrap.style.display = 'none';
     return;
   }
-  if (type === 'public') {
-    // دولتی: یوزر نام مکتب را دستی وارد می‌کند
+  if (type === 'private') {
     if (dropdownWrap) dropdownWrap.style.display = 'none';
     if (customWrap) customWrap.style.display = '';
-    const schoolSel = document.getElementById('f-school');
-    if (schoolSel) schoolSel.value = '';
-  } else if (type === 'private') {
-    // خصوصی: یوزر از لیست آماده انتخاب می‌کند
+  } else if (type === 'public') {
     if (dropdownWrap) dropdownWrap.style.display = '';
     if (customWrap) customWrap.style.display = 'none';
-    const nameInput = document.getElementById('f-school-name');
-    if (nameInput) nameInput.value = '';
+    const customInput = document.getElementById('f-school-name');
+    if (customInput) customInput.value = '';
   } else {
-    // هیچ‌کدام انتخاب نشده
-    if (dropdownWrap) dropdownWrap.style.display = 'none';
+    if (dropdownWrap) dropdownWrap.style.display = '';
     if (customWrap) customWrap.style.display = 'none';
   }
 }
