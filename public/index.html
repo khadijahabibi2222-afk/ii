@@ -1555,12 +1555,12 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
           <input class="fi" type="text" id="f-tazkira" placeholder="نمبر تذکره" style="direction:ltr;" oninput="this.value=toEnglishDigits(this.value)">
         </div>
         <div class="fg">
-          <label class="fl">نام ضمانت کننده</label>
-          <input class="fi" type="text" id="f-guardian" placeholder="نام ضمانت کننده" lang="fa">
+          <label class="fl">نام سرپرست</label>
+          <input class="fi" type="text" id="f-guardian" placeholder="نام سرپرست" lang="fa">
         </div>
         <div class="fg">
-          <label class="fl">اسم پدر ضمانت کننده</label>
-          <input class="fi" type="text" id="f-guardian-father" placeholder="اسم پدر ضمانت کننده" lang="fa">
+          <label class="fl">نام پدر سرپرست</label>
+          <input class="fi" type="text" id="f-guardian-father" placeholder="نام پدر سرپرست" lang="fa">
         </div>
         <div class="fg">
           <label class="fl">موبایل سرپرست <span id="mobileHint" style="color:var(--text3);font-size:.65rem;">(۱۰ رقم)</span></label>
@@ -1625,9 +1625,9 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
             <option value="">— انتخاب کنید —</option>
           </select>
         </div>
-        <div class="fg" id="school-name-wrap" style="display:none;">
+        <div class="fg" id="school-custom-wrap" style="display:none;">
           <label class="fl">نام مکتب خصوصی <span style="color:var(--red)">*</span></label>
-          <input class="fi" type="text" id="f-school-name" placeholder="نام مکتب خصوصی را وارد کنید" lang="fa">
+          <input class="fi" type="text" id="f-school-custom" placeholder="نام مکتب خصوصی را وارد کنید" lang="fa">
         </div>
 
         <div class="fg">
@@ -2140,7 +2140,7 @@ const API = (() => {
     me:     ()      => request('GET',  '/auth/me'),
 
     // Collections — bulk (initial load)
-    getOrphans:    ()        => request('GET',    '/orphans'),
+    getOrphans:    ()        => request('GET',    '/orphans?limit=10000'),
     saveOrphans:   (arr)     => request('PUT',    '/orphans', arr),
     // Single-record — FAST (used on every save/delete)
     createOrphan:  (doc)     => request('POST',   '/orphans', doc),
@@ -3067,8 +3067,8 @@ function openEditModal(id) {
   document.getElementById('f-studytime').value = o.studytime||'';
   document.getElementById('f-goes-school').value = (o.goesSchool === false) ? 'no' : 'yes';
   document.getElementById('f-school-type').value = o.schoolType||'';
-  const scCustomEl = document.getElementById('f-school-name');
-  if(scCustomEl) scCustomEl.value = o.schoolName||'';
+  const scCustomEl = document.getElementById('f-school-custom');
+  if(scCustomEl) scCustomEl.value = o.schoolCustom||'';
   onGoesSchoolChange();
   onSchoolTypeChange();
   currentPhoto = o.photo||null;
@@ -3088,7 +3088,7 @@ function openEditModal(id) {
 }
 
 function clearForm() {
-  ['f-name','f-age','f-father','f-grandfather','f-mother','f-mother-father','f-family','f-guardian','f-guardian-father','f-mobile','f-address','f-notes','f-name-en','f-father-en','f-school-name','f-birthyear','f-birthmonth','f-birthday','f-tazkira'].forEach(id => {
+  ['f-name','f-age','f-father','f-grandfather','f-mother','f-mother-father','f-family','f-guardian','f-guardian-father','f-mobile','f-address','f-notes','f-name-en','f-father-en','f-school-custom','f-birthyear','f-birthmonth','f-birthday','f-tazkira'].forEach(id => {
     const el = document.getElementById(id);
     if(el){ el.value=''; el.classList.remove('error'); }
   });
@@ -3226,7 +3226,7 @@ function saveOrphan() {
     tazkira: document.getElementById('f-tazkira')?.value.trim()||'',
     goesSchool,
     schoolType: goesSchool ? schoolType : '',
-    schoolName: (goesSchool && schoolType === 'private') ? document.getElementById('f-school-name').value.trim() : '',
+    schoolCustom: (goesSchool && schoolType === 'private') ? document.getElementById('f-school-custom').value.trim() : '',
     school: (goesSchool && schoolType !== 'private') ? document.getElementById('f-school').value : '',
     studenttype: document.getElementById('f-studenttype')?.value || 'orphan',
     priority: document.getElementById('f-priority')?.value || '',
@@ -3372,7 +3372,7 @@ function viewOrphan(id) {
     {label:'⭐ سطح استحقاق', value: o.priority==='very_worthy'?'🔴 بسیار مستحق':o.priority==='worthy'?'🟡 مستحق':o.priority==='average'?'🟢 متوسط':'—'},
     {label:'صنف در مکتب', value:o.grade?(o.grade==='university'?'پوهنتون':o.grade==='course'?'کورس':o.grade==='none'?'—':`صنف ${o.grade}`):'—'},
     {label:'وقت درسی', value:o.studytime==='AM'?'قبل از ظهر':o.studytime==='PM'?'بعد از ظهر':o.studytime==='Both'?'صبح و عصر':'—'},
-    {label:'نام پدر ضمانت کننده', value:o.guardianFather||'—'},
+    {label:'نام پدر سرپرست', value:o.guardianFather||'—'},
     {label:t('ml.school'), value:getSchoolName(o.school)},
     {label:'نوع شمولیت', value:o.edutype==='School'?'مکتب':o.edutype==='Course'?'کورس':o.edutype==='Both'?'هر دو':o.edutype||'—'},
     {label:'صنف در کورس', value:o.coursegrade||'—'},
@@ -4691,7 +4691,7 @@ function autoFillEnglishNames() {
 // ── GOES TO SCHOOL toggle ─────────────────────────────
 function onGoesSchoolChange() {
   const goes = document.getElementById('f-goes-school')?.value !== 'no';
-  const schoolFieldIds = ['f-grade', 'f-school', 'f-school-type', 'f-school-name'];
+  const schoolFieldIds = ['f-grade', 'f-school', 'f-school-type', 'f-school-custom'];
   schoolFieldIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -4700,7 +4700,7 @@ function onGoesSchoolChange() {
       el.style.cursor = goes ? '' : 'not-allowed';
     }
   });
-  const wrapIds = ['school-dropdown-wrap', 'school-name-wrap'];
+  const wrapIds = ['school-dropdown-wrap', 'school-custom-wrap'];
   wrapIds.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.opacity = goes ? '' : '0.45';
@@ -4711,7 +4711,7 @@ function onGoesSchoolChange() {
     if (gradeEl && !gradeEl.disabled === false) gradeEl.value = '';
     const typeEl = document.getElementById('f-school-type');
     if (typeEl) typeEl.value = '';
-    document.getElementById('school-name-wrap').style.display = 'none';
+    document.getElementById('school-custom-wrap').style.display = 'none';
   }
 }
 
@@ -4720,7 +4720,7 @@ function onSchoolTypeChange() {
   const type = document.getElementById('f-school-type')?.value;
   const goesSchool = document.getElementById('f-goes-school')?.value !== 'no';
   const dropdownWrap = document.getElementById('school-dropdown-wrap');
-  const customWrap = document.getElementById('school-name-wrap');
+  const customWrap = document.getElementById('school-custom-wrap');
   if (!goesSchool) {
     if (dropdownWrap) dropdownWrap.style.display = 'none';
     if (customWrap) customWrap.style.display = 'none';
@@ -4732,7 +4732,7 @@ function onSchoolTypeChange() {
   } else if (type === 'public') {
     if (dropdownWrap) dropdownWrap.style.display = '';
     if (customWrap) customWrap.style.display = 'none';
-    const customInput = document.getElementById('f-school-name');
+    const customInput = document.getElementById('f-school-custom');
     if (customInput) customInput.value = '';
   } else {
     if (dropdownWrap) dropdownWrap.style.display = '';
@@ -4747,7 +4747,7 @@ function setupFormKeyboardSwitch() {
   const enFields = ['f-name-en', 'f-father-en'];
   const faFields = ['f-name', 'f-father', 'f-grandfather', 'f-mother',
                     'f-guardian', 'f-guardian-father', 'f-address', 'f-notes',
-                    'f-school-name', 's-name'];
+                    'f-school-custom', 's-name'];
   enFields.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -4851,7 +4851,7 @@ function printTableEnglish() {
     const guardianEn=o.guardianEn||transliterateDari(o.guardian||'');
     const goesSchoolLabel=o.goesSchool===false?'No':'Yes';
     const schoolTypeLabel=o.schoolType==='public'?'Public':o.schoolType==='private'?'Private':'—';
-    const schoolNameEn=o.schoolType==='private'?(o.schoolName||'—'):transliterateDari(getSchoolName(o.school));
+    const schoolNameEn=o.schoolType==='private'?(o.schoolCustom||'—'):transliterateDari(getSchoolName(o.school));
     const act=o.isActive===false?'Inactive':'Active';
     const rowClass=o.isActive===false?'inactive-row':'';
     return `<tr class="${rowClass}"><td>${o.id}</td><td>${nameEn}</td><td>${fatherEn}</td><td>${gen}</td><td>${cat}</td><td>${o.age||''}</td><td>${guardianEn||'—'}</td><td>${o.mobile||''}</td><td>${goesSchoolLabel}</td><td>${schoolTypeLabel}</td><td>${gr2}</td><td>${o.coursegrade||'—'}</td><td>${schoolNameEn}</td><td>${edu}</td><td>${st}</td><td>${act}</td></tr>`;
