@@ -36,7 +36,7 @@ router.get('/', auth, [
 ], async (req, res) => {
   try {
     const page   = parseInt(req.query.page,  10) || 1;
-    const limit  = Math.min(parseInt(req.query.limit, 10) || 10000, 10000);
+    const limit  = parseInt(req.query.limit, 10) || 10000;
     const skip   = (page - 1) * limit;
 
     // Build filter from query params
