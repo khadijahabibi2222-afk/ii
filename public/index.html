@@ -2140,7 +2140,7 @@ const API = (() => {
     me:     ()      => request('GET',  '/auth/me'),
 
     // Collections — bulk (initial load)
-    getOrphans:    ()        => request('GET',    '/orphans?limit=10000'),
+    getOrphans:    ()        => request('GET',    '/orphans'),
     saveOrphans:   (arr)     => request('PUT',    '/orphans', arr),
     // Single-record — FAST (used on every save/delete)
     createOrphan:  (doc)     => request('POST',   '/orphans', doc),
