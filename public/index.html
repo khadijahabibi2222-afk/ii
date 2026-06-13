@@ -2140,7 +2140,7 @@ const API = (() => {
     me:     ()      => request('GET',  '/auth/me'),
 
     // Collections — bulk (initial load)
-    getOrphans:    ()        => request('GET',    '/orphans'),
+    getOrphans:    ()        => request('GET',    '/orphans?_t='+Date.now()),
     saveOrphans:   (arr)     => request('PUT',    '/orphans', arr),
     // Single-record — FAST (used on every save/delete)
     createOrphan:  (doc)     => request('POST',   '/orphans', doc),
@@ -2150,7 +2150,7 @@ const API = (() => {
     getSchools:    ()        => request('GET', '/schools'),
     saveSchools:   (arr)     => request('PUT', '/schools', arr),
 
-    getSponsors:   ()        => request('GET', '/sponsors'),
+    getSponsors:   ()        => request('GET', '/sponsors?_t='+Date.now()),
     saveSponsors:  (arr)     => request('PUT', '/sponsors', arr),
     upsertSponsor: (id, doc) => request('PUT',    '/sponsors/' + id, doc),
     createSponsor: (doc)     => request('POST',   '/sponsors', doc),
@@ -7211,7 +7211,8 @@ function saveSponsors() {
 }
 
 async function loadSponsorBinaries() {
-  sponsors = await API.getSponsors() || [];
+  const res = await API.getSponsors();
+  sponsors = (res && Array.isArray(res.data) ? res.data : res) || [];
   updateSponsorBadge();
 }
 
@@ -7250,6 +7251,7 @@ function renderSponsorStats() {
 }
 
 function renderSponsorsTable() {
+  if (!Array.isArray(sponsors)) sponsors = [];
   const q = (document.getElementById('sponsorSearch')?.value||'').toLowerCase();
   const linkF = document.getElementById('sponsorFilterLinked')?.value||'';
   let list = sponsors.filter(s => {
