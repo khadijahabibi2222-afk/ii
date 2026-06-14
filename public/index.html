@@ -2798,47 +2798,57 @@ async function bootApp() {
   // ── Wait for Render cold start before firing all requests ──
   await wakeServer();
 
-  try {
-    // Fetch all data from MongoDB in parallel
-    const [orph, sch, spons, usrs, subj, scr, seas, grads, bks, bkTx] = await Promise.all([
-      API.getOrphans(),
-      API.getSchools(),
-      API.getSponsors(),
-      API.getUsers(),
-      API.getKV('subjects'),
-      API.getKV('scores'),
-      API.getKV('season_days'),
-      API.getKV('graduates'),
-      API.getKV('books'),
-      API.getKV('bookTx'),
-    ]);
-    orphans   = (orph  && Array.isArray(orph.data)  ? orph.data  : orph)  || [];
-    schools   = sch    || [];
-    sponsors  = (spons && Array.isArray(spons.data) ? spons.data : spons) || [];
-    users     = usrs   || [];
-    subjects  = (subj  || []).map(s => typeof s === 'string' ? {name:s,teacher:'',time:''} : s);
-    scores    = scr    || [];
-    seasonDays = seas && Object.keys(seas).length ? seas : {
-      'بهار':    { days:60, months:{'حمل':20,'ثور':20,'جوزا':20} },
-      'تابستان': { days:55, months:{'سرطان':18,'اسد':18,'سنبله':19} },
-      'خزان':    { days:58, months:{'میزان':20,'عقرب':19,'قوس':19} },
-      'زمستان':  { days:50, months:{'جدی':17,'دلو':17,'حوت':16} },
-    };
-    graduates = grads  || [];
-    books     = bks    || [];
-    bookTx    = bkTx   || [];
+  // Fetch all data — allSettled: یک خطا داده‌های بقیه را خراب نمی‌کند
+  const [orph, sch, spons, usrs, subj, scr, seas, grads, bks, bkTx] = (await Promise.allSettled([
+    API.getOrphans(),
+    API.getSchools(),
+    API.getSponsors(),
+    API.getUsers(),
+    API.getKV('subjects'),
+    API.getKV('scores'),
+    API.getKV('season_days'),
+    API.getKV('graduates'),
+    API.getKV('books'),
+    API.getKV('bookTx'),
+  ])).map(r => r.status === 'fulfilled' ? r.value : null);
 
-    if (!subjects.length) {
-      subjects = ['قرآن','دری','پشتو','ریاضی','انگلیسی','علوم','تاریخ','جغرافیه','اسلامیات','رسم']
-        .map(n => ({name:n,teacher:'',time:''}));
-    }
-    if (!schools.length) {
-      schools = [{id:'sc1',name:'مکتب نور'},{id:'sc2',name:'مکتب امید'},{id:'sc3',name:'مکتب آینده'}];
-    }
-  } catch(e) {
-    console.error('Boot load error:', e);
-    showToast('⚠️ خطا در بارگذاری داده‌ها — ' + e.message, 'error');
+  // Helper: extract array from {data:[]} or plain []
+  const arr = v => (v && Array.isArray(v.data) ? v.data : (Array.isArray(v) ? v : []));
+
+  const rawOrphans  = arr(orph);
+  const rawSponsors = arr(spons);
+
+  // Guard: اگر داده کفیل‌ها شبیه ایتام بود (فیلد father دارد) نادیده بگیر
+  const sponsorLooks = rawSponsors.filter(x => x && typeof x === 'object' && !x.father);
+
+  orphans   = rawOrphans;
+  schools   = arr(sch);
+  sponsors  = sponsorLooks;
+  users     = arr(usrs);
+  subjects  = (arr(subj)).map(s => typeof s === 'string' ? {name:s,teacher:'',time:''} : s);
+  scores    = arr(scr);
+  seasonDays = (seas && !Array.isArray(seas) && seas && Object.keys(seas).length) ? seas : {
+    'بهار':    { days:60, months:{'حمل':20,'ثور':20,'جوزا':20} },
+    'تابستان': { days:55, months:{'سرطان':18,'اسد':18,'سنبله':19} },
+    'خزان':    { days:58, months:{'میزان':20,'عقرب':19,'قوس':19} },
+    'زمستان':  { days:50, months:{'جدی':17,'دلو':17,'حوت':16} },
+  };
+  graduates = arr(grads);
+  books     = arr(bks);
+  bookTx    = arr(bkTx);
+
+  if (!subjects.length) {
+    subjects = ['قرآن','دری','پشتو','ریاضی','انگلیسی','علوم','تاریخ','جغرافیه','اسلامیات','رسم']
+      .map(n => ({name:n,teacher:'',time:''}));
   }
+  if (!schools.length) {
+    schools = [{id:'sc1',name:'مکتب نور'},{id:'sc2',name:'مکتب امید'},{id:'sc3',name:'مکتب آینده'}];
+  }
+
+  // گزارش خطاهای جزئی بدون قطع شدن کل اپ
+  const failedApis = ['ایتام','مکاتب','کفیل‌ها','کاربران','مضامین','نمرات','فصل‌ها','فارغان','کتاب‌ها','معاملات']
+    .filter((_,i) => [orph,sch,spons,usrs,subj,scr,seas,grads,bks,bkTx][i] === null);
+  if (failedApis.length) showToast('⚠️ خطا در بارگذاری: ' + failedApis.join('، '), 'warn');
 
   document.getElementById('orphanCountBadge').textContent  = orphans.length;
   document.getElementById('sponsorCountBadge').textContent = sponsors.length;
