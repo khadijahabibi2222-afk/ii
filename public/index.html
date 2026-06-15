@@ -589,42 +589,48 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
     </div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section" id="nav-s1">MAIN</div>
     <div class="nav-item active" onclick="showSection('dashboard')" data-section="dashboard" id="nav-dashboard">
-      <span class="nav-icon">📊</span><span id="nav-t-dash">Dashboard</span>
+      <span class="nav-icon">📊</span><span id="nav-t-dash">داشبورد</span>
     </div>
     <div class="nav-item" onclick="showSection('orphans')" data-section="orphans" id="nav-orphans">
-      <span class="nav-icon">👶</span><span id="nav-t-orph">پرونده‌های یتیم</span>
+      <span class="nav-icon">👶</span><span id="nav-t-orph">پرونده ایتام</span>
       <span class="nav-badge" id="orphanCountBadge">0</span>
     </div>
     <div class="nav-item" onclick="showSection('families')" data-section="families" id="nav-families">
-      <span class="nav-icon">🏠</span><span id="nav-t-fam">خانواده‌ها</span>
+      <span class="nav-icon">🏠</span><span id="nav-t-fam">پرونده خانواده‌ها</span>
       <span class="nav-badge" id="familyCountBadge">0</span>
     </div>
     <div class="nav-item" onclick="showSection('sponsors')" data-section="sponsors" id="nav-sponsors">
-      <span class="nav-icon">🤝</span><span id="nav-t-sponsors">کفیل‌ها</span>
+      <span class="nav-icon">🤝</span><span id="nav-t-sponsors">پرونده کفیل‌ها</span>
       <span class="nav-badge" id="sponsorCountBadge">0</span>
     </div>
-    <div class="nav-section" id="nav-s2">TOOLS</div>
 
-    <div class="nav-item" onclick="showSection('reports')" data-section="reports" id="nav-reports">
-      <span class="nav-icon">📋</span><span id="nav-t-rep">Reports</span>
+    <!-- تنظیمات -->
+    <div class="nav-item nav-settings-toggle" onclick="toggleSettingsMenu()" id="nav-settings-toggle" style="margin-top:6px;">
+      <span class="nav-icon">⚙️</span>
+      <span>تنظیمات</span>
+      <span id="settings-arrow" style="margin-right:auto;margin-left:4px;font-size:.75rem;transition:transform .2s;">▾</span>
     </div>
-    <div class="nav-item" onclick="showSection('export')" data-section="export" id="nav-export">
-      <span class="nav-icon">📤</span><span id="nav-t-exp">Export</span>
+    <div id="settings-submenu" style="display:none;padding-right:12px;">
+      <div class="nav-item" onclick="showSection('reports')" data-section="reports" id="nav-reports">
+        <span class="nav-icon">📋</span><span id="nav-t-rep">گزارش‌ها</span>
+      </div>
+      <div class="nav-item" onclick="showSection('schools')" data-section="schools" id="nav-schools">
+        <span class="nav-icon">🏫</span><span id="nav-t-sch">مدیریت مکاتب</span>
+      </div>
+      <div class="nav-item" onclick="showSection('users')" data-section="users" id="nav-users">
+        <span class="nav-icon">👥</span><span id="nav-t-usr">مدیریت کاربران</span>
+      </div>
+      <div class="nav-item" onclick="showSection('export')" data-section="export" id="nav-export">
+        <span class="nav-icon">📤</span><span id="nav-t-exp">خروجی داده</span>
+      </div>
+      <div class="nav-item" onclick="showSection('backup')" data-section="backup" id="nav-backup">
+        <span class="nav-icon">💾</span><span id="nav-t-bak">پشتیبان‌گیری</span>
+      </div>
     </div>
-    <div class="nav-item" onclick="showSection('backup')" data-section="backup" id="nav-backup">
-      <span class="nav-icon">💾</span><span id="nav-t-bak">Backup & Restore</span>
-    </div>
-    <div class="nav-section" id="nav-s3">SYSTEM</div>
-    <div class="nav-item" onclick="showSection('schools')" data-section="schools" id="nav-schools">
-      <span class="nav-icon">🏫</span><span id="nav-t-sch">School Management</span>
-    </div>
-    <div class="nav-item" onclick="showSection('users')" data-section="users" id="nav-users">
-      <span class="nav-icon">👥</span><span id="nav-t-usr">User Management</span>
-    </div>
-    <div class="nav-item" onclick="doLogout()">
-      <span class="nav-icon">🚪</span><span id="nav-t-logout">Logout</span>
+
+    <div class="nav-item" onclick="doLogout()" style="margin-top:4px;">
+      <span class="nav-icon">🚪</span><span id="nav-t-logout">خروج</span>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -1461,13 +1467,13 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
 </div><!-- /app -->
 
 <!-- ADD/EDIT ORPHAN MODAL -->
-<div class="modal-overlay" id="orphanModal">
+<div class="modal-overlay" id="orphanModal" onclick="if(event.target===this)minimizeOrphanModal()">
 <div class="modal" style="max-width:860px;">
   <div class="modal-header" style="padding:1rem 1.25rem;">
     <div class="modal-title" id="modalTitle" style="font-size:1.05rem;">افزودن یتیم</div>
     <div style="display:flex;align-items:center;gap:.75rem;">
       <span id="formIdDisplay" style="font-size:.75rem;color:var(--text3);font-family:monospace;"></span>
-      <button class="modal-close" onclick="closeModal('orphanModal')">✕</button>
+      <button class="modal-close" onclick="closeOrphanModal()">✕</button>
     </div>
   </div>
   <div class="modal-body" style="padding:1rem 1.25rem;" dir="rtl">
@@ -1544,7 +1550,7 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
         <div class="fg" style="grid-column:span 1;">
           <label class="fl">📅 تاریخ تولد (میلادی)</label>
           <input class="fi" type="date" id="f-dob" onchange="autoCalcAgeFromDOB()"
-            style="font-family:'DM Sans',sans-serif;direction:ltr;font-size:.88rem;">
+            style="font-family:'DM Sans',monospace;direction:ltr;font-size:.88rem;" lang="en">
         </div>
         <div class="fg">
           <label class="fl">سن <span style="color:var(--text3);font-size:.68rem;">(خودکار)</span></label>
@@ -1700,7 +1706,7 @@ body.rtl .nav-badge { margin-left: 0; margin-right: auto; }
 
   </div>
   <div class="modal-footer" dir="rtl" style="padding:.85rem 1.25rem;">
-    <button class="btn btn-secondary btn-sm" onclick="closeModal('orphanModal')" id="ml-cancel">لغو</button>
+    <button class="btn btn-secondary btn-sm" onclick="closeOrphanModal()" id="ml-cancel">لغو</button>
     <button class="btn btn-primary btn-sm" onclick="saveOrphan()" id="ml-save" style="min-width:120px;">💾 ذخیره پرونده</button>
   </div>
 </div>
@@ -3262,7 +3268,7 @@ function saveOrphan() {
 
   // ── Close UI without waiting for network ─────────────────
   _restoreBtn();
-  closeModal('orphanModal');
+  closeOrphanModal();
   filterOrphans();
   renderDashboard();
   renderSchoolsSection();
@@ -3451,21 +3457,72 @@ function confirmDelete() {
 // ======================================================
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ── Orphan modal: minimize instead of close on outside click ── */
+function minimizeOrphanModal() {
+  const overlay = document.getElementById('orphanModal');
+  overlay.classList.remove('open');
+  overlay.classList.add('minimized');
+  let fab = document.getElementById('orphanModalFAB');
+  if (!fab) {
+    fab = document.createElement('button');
+    fab.id = 'orphanModalFAB';
+    fab.innerHTML = '📝 ادامه فرم';
+    fab.onclick = restoreOrphanModal;
+    fab.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+      z-index:9999;background:var(--gold,#c9a84c);color:#fff;border:none;border-radius:30px;
+      padding:10px 22px;font-family:var(--font-fa);font-size:.95rem;font-weight:700;
+      cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.35);
+      display:flex;align-items:center;gap:8px;white-space:nowrap;`;
+    document.body.appendChild(fab);
+  }
+  fab.style.display = 'flex';
+}
+function restoreOrphanModal() {
+  const overlay = document.getElementById('orphanModal');
+  overlay.classList.remove('minimized');
+  overlay.classList.add('open');
+  const fab = document.getElementById('orphanModalFAB');
+  if (fab) fab.style.display = 'none';
+}
+function closeOrphanModal() {
+  const overlay = document.getElementById('orphanModal');
+  overlay.classList.remove('open', 'minimized');
+  const fab = document.getElementById('orphanModalFAB');
+  if (fab) fab.style.display = 'none';
+}
 document.querySelectorAll('.modal-overlay').forEach(m => {
+  if (m.id === 'orphanModal') return; // orphanModal با minimizeOrphanModal کنترل می‌شود
   m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
 });
 
 // ======================================================
 // NAVIGATION
 // ======================================================
+function toggleSettingsMenu() {
+  const menu = document.getElementById('settings-submenu');
+  const arrow = document.getElementById('settings-arrow');
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
 function showSection(name) {
+  const settingsSections = ['reports','schools','users','export','backup'];
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('sec-'+name).classList.add('active');
+  document.getElementById('sec-'+name)?.classList.add('active');
   document.getElementById('nav-'+name)?.classList.add('active');
-  const titles = {dashboard:t('dash.title'),orphans:t('orph.title'),reports:t('rep.title'),export:t('exp.title'),backup:t('bak.title'),schools:'مدیریت مکاتب',users:t('usr.title'),scores:'ثبت نمرات',rankings:'🏆 رتبه‌بندی شاگردان',seasons:'📅 مدیریت فصول',graduates:'🎓 سوابق فارغان',bookstore:'📚 گدام کتب',sponsors:'🤝 کفیل‌ها',families:'🏠 خانواده‌ها'};
-  document.getElementById('topbarTitle').textContent = titles[name]||'';
-  // Close sidebar on mobile
+  // اگر بخش انتخابی در تنظیمات است، منوی تنظیمات را باز کن
+  if (settingsSections.includes(name)) {
+    const menu = document.getElementById('settings-submenu');
+    const arrow = document.getElementById('settings-arrow');
+    if (menu) menu.style.display = 'block';
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+    document.getElementById('nav-settings-toggle')?.classList.add('active');
+  }
+  const titles = {dashboard:'داشبورد',orphans:'پرونده ایتام',families:'پرونده خانواده‌ها',sponsors:'پرونده کفیل‌ها',reports:'گزارش‌ها',export:'خروجی داده',backup:'پشتیبان‌گیری',schools:'مدیریت مکاتب',users:'مدیریت کاربران',scores:'ثبت نمرات',rankings:'🏆 رتبه‌بندی',seasons:'📅 مدیریت فصول',graduates:'🎓 فارغان',bookstore:'📚 گدام کتب'};
+  document.getElementById('topbarTitle').textContent = titles[name] || '';
   document.getElementById('sidebar').classList.remove('open');
   if(name==='orphans') { filterOrphans(); renderTable(); }
   if(name==='families') { renderFamilies(); }
