@@ -4879,8 +4879,8 @@ function printTableFarsi() {
   </div>
   <h2 style="font-size:13px;color:#333;">پرونده‌های ایتام — ${new Date().toLocaleDateString('fa-IR')}</h2>
   <p style="color:#888;font-size:10px;">مجموع: ${filteredOrphans.length} پرونده</p>
-  <table><thead><tr><th>شناسه</th><th>اسم</th><th>ولد</th><th>ولدیت</th><th>جنسیت</th><th>کتگوری شاگرد</th><th>سن</th><th>نام مادر</th><th>ولد مادر</th><th>تذکره</th><th>مکتب</th><th>تعداد فامیل</th><th>آدرس</th><th>سرپرست</th><th>موبایل</th><th>صنف مکتب</th><th>صنف کورس</th><th>نوع شمولیت</th><th>وضعیت جسمی</th><th>وضعیت پرونده</th></tr></thead>
-  <tbody>${filteredOrphans.map(o=>{
+  <table><thead><tr><th>#</th><th>شناسه</th><th>اسم</th><th>ولد</th><th>ولدیت</th><th>جنسیت</th><th>کتگوری شاگرد</th><th>سن</th><th>نام مادر</th><th>ولد مادر</th><th>تذکره</th><th>مکتب</th><th>تعداد فامیل</th><th>آدرس</th><th>سرپرست</th><th>موبایل</th><th>صنف مکتب</th><th>صنف کورس</th><th>نوع شمولیت</th><th>وضعیت جسمی</th><th>وضعیت پرونده</th></tr></thead>
+  <tbody>${filteredOrphans.map((o,idx)=>{
     const st=o.status==='Healthy'?'صحتمند':o.status==='Disabled'?'معلول':'بیماری مزمن';
     const edu=o.edutype==='School'?'مکتب':o.edutype==='Course'?'کورس':o.edutype==='Both'?'هر دو':'—';
     const gr2=o.grade?(o.grade==='university'?'پوهنتون':o.grade==='course'?'کورس':o.grade==='none'?'—':`صنف ${o.grade}`):'—';
@@ -4888,7 +4888,7 @@ function printTableFarsi() {
     const gen=o.gender||'—';
     const act=o.isActive===false?'غیرفعال':'فعال';
     const rowStyle=o.isActive===false?'opacity:0.55;background:#fff8f8;':'';
-    return `<tr style="${rowStyle}"><td>${o.id}</td><td>${o.name||''}</td><td>${o.father||''}</td><td>${o.grandfather||''}</td><td>${gen}</td><td>${cat}</td><td>${o.age||''}</td><td>${o.mother||'—'}</td><td>${o.motherFather||'—'}</td><td style='direction:ltr;text-align:center;'>${o.tazkira||'—'}</td><td>${getSchoolDisplay(o)}</td><td style='text-align:center;'>${o.family||'—'}</td><td>${o.address||'—'}</td><td>${o.guardian||'—'}</td><td style='direction:ltr;text-align:right;'>${o.mobile||''}</td><td>${gr2}</td><td>${o.coursegrade||'—'}</td><td>${edu}</td><td>${st}</td><td>${act}</td></tr>`;
+    return `<tr style="${rowStyle}"><td style='text-align:center;color:#888;'>${idx+1}</td><td>${o.id}</td><td>${o.name||''}</td><td>${o.father||''}</td><td>${o.grandfather||''}</td><td>${gen}</td><td>${cat}</td><td>${o.age||''}</td><td>${o.mother||'—'}</td><td>${o.motherFather||'—'}</td><td style='direction:ltr;text-align:center;'>${o.tazkira||'—'}</td><td>${getSchoolDisplay(o)}</td><td style='text-align:center;'>${o.family||'—'}</td><td>${o.address||'—'}</td><td>${o.guardian||'—'}</td><td style='direction:ltr;text-align:right;'>${o.mobile||''}</td><td>${gr2}</td><td>${o.coursegrade||'—'}</td><td>${edu}</td><td>${st}</td><td>${act}</td></tr>`;
   }).join('')}</tbody></table></body></html>`);
   w.document.close(); w.print();
 }
