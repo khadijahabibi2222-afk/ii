@@ -35,8 +35,8 @@ router.get('/', auth, [
   handle,
 ], async (req, res) => {
   try {
-    const page   = req.query.page  || 1;
-    const limit  = req.query.limit || 100;
+    const page   = parseInt(req.query.page,  10) || 1;
+    const limit  = parseInt(req.query.limit, 10) || 10000;
     const skip   = (page - 1) * limit;
 
     // Build filter from query params
@@ -153,7 +153,7 @@ router.get('/:id', auth, async (req, res) => {
 // ════════════════════════════════════════════════════════════
 router.post('/', auth, [...orphanRules(), handle], async (req, res) => {
   try {
-    if (req.body.schoolType === 'public') req.body.schoolName = '';
+    if (req.body.schoolType === 'public') req.body.schoolCustom = '';
     const doc = await _processPhoto(req.body, req.body.id);
 
     await Orphan.updateOne(
@@ -224,7 +224,7 @@ router.post('/bulk', auth, [
 // ════════════════════════════════════════════════════════════
 router.put('/:id', auth, [...orphanRules(), handle], async (req, res) => {
   try {
-    if (req.body.schoolType === 'public') req.body.schoolName = '';
+    if (req.body.schoolType === 'public') req.body.schoolCustom = '';
     const doc = await _processPhoto(req.body, req.params.id);
 
     await Orphan.updateOne(
